@@ -1,14 +1,11 @@
-// app/(public routes)/sign-up/page.tsx
-
 'use client';
 
-// Додаємо імпорти
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { register } from '@/lib/api/clientApi';
 
 import css from './SignUpPage.module.css';
-import { ApiError } from '@/app/api/api';
+import { ApiError } from '@/lib/api/api';
 import { RegisterRequest } from '@/types/user';
 
 const SignUp = () => {
@@ -17,11 +14,9 @@ const SignUp = () => {
 
   const handleSubmit = async (formData: FormData) => {
     try {
-      // Типізуємо дані форми
       const formValues = Object.fromEntries(formData) as RegisterRequest;
-      // Виконуємо запит
       const res = await register(formValues);
-      // Виконуємо редірект або відображаємо помилку
+
       if (res) {
         router.push('/profile');
       } else {
@@ -29,7 +24,7 @@ const SignUp = () => {
       }
     } catch (error) {
       setError(
-        (error as ApiError).response?.data?.erro ??
+        (error as ApiError).response?.data?.error ??
           (error as ApiError).message ??
           'Oops... some error'
       );

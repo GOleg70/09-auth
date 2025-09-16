@@ -8,7 +8,7 @@ import {
   fetchNotes,
   type FetchNotesResponse,
   type FetchNotesParams,
-} from '@/lib/api';
+} from '@/lib/api/clientApi';
 
 import SearchBox from '@/components/SearchBox/SearchBox';
 import Pagination from '@/components/Pagination/Pagination';

@@ -1,42 +1,9 @@
-// 'use client';
-
-// import { checkSession, getMe } from '../../lib/api/clientApi';
-// import { useAuthStore } from '../../lib/store/authStore';
-// import { useEffect } from 'react';
-
-// type Props = {
-//   children: React.ReactNode;
-// };
-
-// const AuthProvider = ({ children }: Props) => {
-//   const setUser = useAuthStore((state) => state.setUser);
-//   const clearIsAuthenticated = useAuthStore(
-//     (state) => state.clearIsAuthenticated
-//   );
-
-//   useEffect(() => {
-//     const fetchUser = async () => {
-//       const isAuthenticated = await checkSession();
-//       if (isAuthenticated) {
-//         const user = await getMe();
-//         if (user) setUser(user);
-//       } else {
-//         clearIsAuthenticated();
-//       }
-//     };
-//     fetchUser();
-//   }, [setUser, clearIsAuthenticated]);
-
-//   return children;
-// };
-
-// export default AuthProvider;
-// components/AuthProvider/AuthProvider.tsx
 'use client';
 
-import { useRef, type ReactNode } from 'react';
+import { useRef, useEffect, useState, type ReactNode } from 'react';
 import { useAuthStore } from '../../lib/store/authStore';
 import { User } from '../../types/user';
+import { checkSession, getMe } from '@/lib/api/clientApi';
 
 interface AuthProviderProps {
   initialState: {
@@ -48,14 +15,46 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ initialState, children }: AuthProviderProps) => {
   const initialized = useRef(false);
+  const { setUser, clearIsAuthenticated } = useAuthStore();
+  const [hydrated, setHydrated] = useState(false);
 
-  // Ініціалізуємо стор тільки один раз
   if (!initialized.current) {
     useAuthStore.setState({
       isAuthenticated: initialState.isAuthenticated,
       user: initialState.user,
     });
     initialized.current = true;
+  }
+
+  useEffect(() => {
+    const initAuth = async () => {
+      const forceLoggedOut = localStorage.getItem('forceLoggedOut');
+      if (forceLoggedOut === 'true') {
+        setHydrated(true);
+        return;
+      }
+
+      try {
+        const sessionOk = await checkSession();
+        if (sessionOk) {
+          const me = await getMe();
+          setUser(me);
+        } else {
+          clearIsAuthenticated();
+        }
+      } catch {
+        clearIsAuthenticated();
+      } finally {
+        setHydrated(true);
+      }
+    };
+
+    initAuth();
+  }, [setUser, clearIsAuthenticated]);
+
+  if (!hydrated) {
+    // тут можна показати Loader або null
+    return null;
   }
 
   return <>{children}</>;

@@ -1,35 +1,38 @@
 'use client';
 
-// Додаємо імпорти
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import css from './SignInPage.module.css';
 import { login } from '@/lib/api/clientApi';
-import { ApiError } from '@/app/api/api';
+// import { ApiError } from '@/app/api/api';
 import { LoginRequest } from '@/types/user';
+import { useAuthStore } from '@/lib/store/authStore';
+import type { AxiosError } from 'axios';
 
 const SignIn = () => {
   const router = useRouter();
   const [error, setError] = useState('');
+  const setUser = useAuthStore((state) => state.setUser);
 
   const handleSubmit = async (formData: FormData) => {
     try {
-      // Типізуємо дані форми
-      const formValues = Object.fromEntries(formData) as LoginRequest; // Виконуємо запит
-      const res = await login(formValues); // Виконуємо редірект або відображаємо помилку
+      const formValues = Object.fromEntries(formData) as LoginRequest;
+      const res = await login(formValues);
+
       if (res) {
+        setUser(res);
         router.push('/profile');
       } else {
         setError('Invalid email or password');
       }
     } catch (error) {
+      const err = error as AxiosError<{ error?: string }>;
       setError(
-        (error as ApiError).response?.data?.erro ??
-          (error as ApiError).message ??
-          'Oops... some error'
+        err.response?.data?.error ?? err.message ?? 'Oops... some error'
       );
     }
   };
+
   return (
     <main className={css.mainContent}>
       <form className={css.form} action={handleSubmit}>

@@ -3,31 +3,49 @@ import { Note, CreateNote } from '../../types/note';
 import { User } from '../../types/user';
 import { nextServer } from './api';
 
-interface NotesHttpResponse {
-  notes: Note[];
-  totalPages: number;
-}
+// interface NotesHttpResponse {
+//   notes: Note[];
+//   totalPages: number;
+// }
 
 export const getServerNotes = async (
-  query: string,
-  page: number,
+  query = '',
+  page = 1,
+  perPage = 12,
   tag?: string
-): Promise<NotesHttpResponse> => {
-  const PARAMS = new URLSearchParams({
-    ...(query !== '' ? { search: query } : {}),
-    ...(tag !== undefined ? { tag } : {}),
-    page: page.toString(),
-  });
+) => {
   const cookieStore = await cookies();
+  const sessionCookie = cookieStore.get('sessionId');
 
-  const response = await nextServer.get('/notes', {
-    params: PARAMS,
-    headers: {
-      Cookie: cookieStore.toString(),
-    },
+  if (!sessionCookie) {
+    return {
+      status: 401,
+      data: { notes: [], totalPages: 0 },
+    };
+  }
+
+  const PARAMS = new URLSearchParams({
+    page: String(page),
+    perPage: String(perPage),
+    ...(query.trim() ? { search: query } : {}),
+    ...(tag ? { tag } : {}),
   });
 
-  return response.data;
+  try {
+    const response = await nextServer.get('/notes', {
+      params: PARAMS,
+      headers: {
+        Cookie: `${sessionCookie.name}=${sessionCookie.value}`,
+      },
+    });
+    return response.data;
+  } catch (error) {
+    console.error('Failed to fetch notes on server:', error);
+    return {
+      status: 500,
+      data: { notes: [], totalPages: 0 },
+    };
+  }
 };
 
 export const createServerNote = async (newNote: CreateNote): Promise<Note> => {

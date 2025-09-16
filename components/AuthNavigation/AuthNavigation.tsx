@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { logout } from '../../lib/api/clientApi';
@@ -14,13 +15,23 @@ const AuthNavigation = () => {
     (state) => state.clearIsAuthenticated
   );
 
-  console.log(isAuthenticated);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) {
+    // тут можна повернути пустий фрагмент, щоб SSR і CSR співпадали
+    return null;
+  }
 
   const handleLogout = async () => {
     await logout();
     clearIsAuthenticated();
     router.push('/sign-in');
   };
+
   return isAuthenticated ? (
     <>
       <li className={css.navigationItem}>
