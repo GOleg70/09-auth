@@ -5,8 +5,8 @@ import {
   LoginRequest,
   RegisterRequest,
   UpdateUserRequest,
-  User,
-} from '@/types/user';
+} from '@/types/api';
+import { User } from '@/types/user';
 import { api } from './api';
 import { CreateNote, Note, NoteTag } from '@/types/note';
 

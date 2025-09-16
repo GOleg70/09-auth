@@ -3,21 +3,24 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { register } from '@/lib/api/clientApi';
+import { useAuthStore } from '@/lib/store/authStore';
+import { ApiError } from '@/lib/api/api';
+import { RegisterRequest } from '@/types/api';
 
 import css from './SignUpPage.module.css';
-import { ApiError } from '@/lib/api/api';
-import { RegisterRequest } from '@/types/user';
 
 const SignUp = () => {
   const router = useRouter();
   const [error, setError] = useState('');
+  const { setUser } = useAuthStore();
 
   const handleSubmit = async (formData: FormData) => {
     try {
       const formValues = Object.fromEntries(formData) as RegisterRequest;
       const res = await register(formValues);
 
-      if (res) {
+      if (res && res.username) {
+        setUser(res);
         router.push('/profile');
       } else {
         setError('Invalid email or password');
