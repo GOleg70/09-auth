@@ -9,7 +9,7 @@ import { editProfile } from '@/lib/api/clientApi';
 
 // TYPES
 
-import { UpdateUserRequest } from '../../../../types/user';
+import { UpdateUserRequest } from '../../../../types/api';
 
 // MEDIA
 
