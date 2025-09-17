@@ -1,6 +1,6 @@
 import { HydrationBoundary, dehydrate } from '@tanstack/react-query';
 import getQueryClient from '@/lib/api/getQueryClient';
-import { fetchNoteById } from '@/lib/api/clientApi';
+import { fetchServerNoteById } from '@/lib/api/serverApi';
 import NotePreview from '@/app/@modal/(.)notes/[id]/NotePreview.client';
 
 interface Props {
@@ -15,7 +15,7 @@ export default async function InterceptedNoteModal({ params }: Props) {
   // Префетчимо нотатку перед рендером
   await queryClient.prefetchQuery({
     queryKey: ['note', id],
-    queryFn: () => fetchNoteById(id),
+    queryFn: () => fetchServerNoteById(id),
   });
 
   return (
